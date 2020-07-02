@@ -111,7 +111,73 @@ KAFKA
 
 5. 발행된 메시지 : An unusual transaction has been detected. customer : CustomerId{id=499fac4c-f92f-4f1d-b496-dacd82bf913c}, dateTime : 2020-07-02T22:27:20.817
 
-
 이체 및 인출 감지 시작 시간 -> 2020-07-02T22:48:54.305, event : Withdrawal{customerId=CustomerId{id=e799b512-a449-4ed2-a4cc-56fa4adf9ec0}, accountNumber=AccountNumber{no='3333-07-8711507'}, money=Money{won=1000000}, createDate=2020-07-02T22:48:54.104}
-
 fds.transactions 발송 시간 -> 2020-07-02T22:48:54.104, An unusual transaction has been detected. customer : CustomerId{id=e799b512-a449-4ed2-a4cc-56fa4adf9ec0}, dateTime : 2020-07-02T22:48:54.104
+
+6. MonogoDB 이벤트 프로파일 로그
+
+회원 가입 로그
+{
+	"_id" : ObjectId("5efde7f9f70b4caa3167a86c"),
+	"birthDate" : ISODate("1855-12-25T08:27:52.000+08:30"),
+	"createDate" : ISODate("2020-07-03T07:58:16.462+09:00"),
+	"customerId" : {
+		"_id" : "5e3c3c03-602c-428c-b80e-7064344c56ec"
+	},
+	"name" : "황미영"
+}
+
+계좌 생성 로그
+{
+	"_id" : ObjectId("5efde7f9f70b4caa3167a873"),
+	"accountNumber" : {
+		"no" : "3333-07-2052927"
+	},
+	"createDate" : ISODate("2020-07-03T07:58:17.317+09:00"),
+	"customerId" : {
+		"_id" : "5e3c3c03-602c-428c-b80e-7064344c56ec"
+	}
+}
+
+입금 로그
+{
+  "_id": "5efde7fcf70b4caa3167a882",
+  "accountNumber": {
+    "no": "3333-07-2052927"
+  },
+  "createDate": "2020-07-02T22:58:20.728Z",
+  "customerId": {
+    "_id": "5e3c3c03-602c-428c-b80e-7064344c56ec"
+  },
+  "money": {
+    "won": 500000
+  }
+},
+{
+  "_id": "5efde7fcf70b4caa3167a87b",
+  "accountNumber": {
+    "no": "3333-07-2052927"
+  },
+  "createDate": "2020-07-02T22:58:20.514Z",
+  "customerId": {
+    "_id": "5e3c3c03-602c-428c-b80e-7064344c56ec"
+  },
+  "money": {
+    "won": 500000
+  }
+}
+
+출금 로그
+{
+	"_id" : ObjectId("5efde7fdf70b4caa3167a88f"),
+	"accountNumber" : {
+		"no" : "3333-07-2052927"
+	},
+	"createDate" : ISODate("2020-07-03T07:58:20.929+09:00"),
+	"customerId" : {
+		"_id" : "5e3c3c03-602c-428c-b80e-7064344c56ec"
+	},
+	"money" : {
+		"won" : 1000000
+	}
+}
