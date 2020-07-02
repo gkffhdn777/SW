@@ -98,86 +98,89 @@ KAFKA
 2. transaction-generator -> Application.java -> Scenario.fail1(bankProducer, repository); (메인 함수 실행)
 
 3. **transaction-generator** 로그 출력
-[main] INFO com.kakaobank.Application - date : 2020-07-02T22:27:16.449, 실패 시나리오 start.....
-[main] INFO com.kakaobank.Scenario - 아이디 : CustomerId{id=0a7d42e8-bf4e-46bd-b96a-326ba29d7cc9}, 황미영님 입금하였습니다. : Money{amount=500000}, 황미영님 통장 잔고 : Money{amount=500000}
-[main] INFO com.kakaobank.Scenario - 아이디 : CustomerId{id=0a7d42e8-bf4e-46bd-b96a-326ba29d7cc9}, 황미영님 입금하였습니다. : Money{amount=500000}, 황미영님 통장 잔고 : Money{amount=1000000}
-[main] INFO com.kakaobank.Scenario - 아이디 : CustomerId{id=0a7d42e8-bf4e-46bd-b96a-326ba29d7cc9}, 황미영님 인출하였습니다. : Money{amount=1000000}, 황미영님 통장 잔고 : Money{amount=0}
-[main] INFO com.kakaobank.Application - 실패 시나리오 end.....
+
+        실패 시나리오 start.....
+        CustomerId{id=0a7d42e8-bf4e-46bd-b96a-326ba29d7cc9}, 황미영님 입금하였습니다. : Money{amount=500000}, 황미영님 통장 잔고 : Money{amount=500000}
+        아이디 : CustomerId{id=0a7d42e8-bf4e-46bd-b96a-326ba29d7cc9}, 황미영님 입금하였습니다. : Money{amount=500000}, 황미영님 통장 잔고 : Money{amount=1000000}
+        아이디 : CustomerId{id=0a7d42e8-bf4e-46bd-b96a-326ba29d7cc9}, 황미영님 인출하였습니다. : Money{amount=1000000}, 황미영님 통장 잔고 : Money{amount=0}
+        실패 시나리오 end.....
 
 
 4. **evaluator**
 이상 감지시 발행되는 토픽 확인
-./kafka-console-consumer.sh --topic fds.detections  --bootstrap-server {localhost:9092 ...} --from-beginning
+
+        ./kafka-console-consumer.sh --topic fds.detections  --bootstrap-server {localhost:9092 ...} --from-beginning
 
 5. 발행된 메시지 : An unusual transaction has been detected. customer : CustomerId{id=499fac4c-f92f-4f1d-b496-dacd82bf913c}, dateTime : 2020-07-02T22:27:20.817
 
-이체 및 인출 감지 시작 시간 -> 2020-07-02T22:48:54.305, event : Withdrawal{customerId=CustomerId{id=e799b512-a449-4ed2-a4cc-56fa4adf9ec0}, accountNumber=AccountNumber{no='3333-07-8711507'}, money=Money{won=1000000}, createDate=2020-07-02T22:48:54.104}
-fds.transactions 발송 시간 -> 2020-07-02T22:48:54.104, An unusual transaction has been detected. customer : CustomerId{id=e799b512-a449-4ed2-a4cc-56fa4adf9ec0}, dateTime : 2020-07-02T22:48:54.104
+        이체 및 인출 감지 시작 시간 -> 2020-07-02T22:48:54.305, event : Withdrawal{customerId=CustomerId{id=e799b512-a449-4ed2-a4cc-56fa4adf9ec0}, accountNumber=AccountNumber{no='3333-07-8711507'}, money=Money{won=1000000}, createDate=2020-07-02T22:48:54.104}
+
+        fds.transactions 발송 시간 -> 2020-07-02T22:48:54.104, An unusual transaction has been detected. customer : CustomerId{id=e799b512-a449-4ed2-a4cc-56fa4adf9ec0}, dateTime : 2020-07-02T22:48:54.104
 
 6. MonogoDB 이벤트 프로파일 로그
 
-회원 가입 로그
-{
-	"_id" : ObjectId("5efde7f9f70b4caa3167a86c"),
-	"birthDate" : ISODate("1855-12-25T08:27:52.000+08:30"),
-	"createDate" : ISODate("2020-07-03T07:58:16.462+09:00"),
-	"customerId" : {
-		"_id" : "5e3c3c03-602c-428c-b80e-7064344c56ec"
-	},
-	"name" : "황미영"
-}
+        회원 가입 로그
+        {
+            "_id" : ObjectId("5efde7f9f70b4caa3167a86c"),
+            "birthDate" : ISODate("1855-12-25T08:27:52.000+08:30"),
+            "createDate" : ISODate("2020-07-03T07:58:16.462+09:00"),
+            "customerId" : {
+                "_id" : "5e3c3c03-602c-428c-b80e-7064344c56ec"
+            },
+            "name" : "황미영"
+        }
 
-계좌 생성 로그
-{
-	"_id" : ObjectId("5efde7f9f70b4caa3167a873"),
-	"accountNumber" : {
-		"no" : "3333-07-2052927"
-	},
-	"createDate" : ISODate("2020-07-03T07:58:17.317+09:00"),
-	"customerId" : {
-		"_id" : "5e3c3c03-602c-428c-b80e-7064344c56ec"
-	}
-}
+        계좌 생성 로그
+        {
+            "_id" : ObjectId("5efde7f9f70b4caa3167a873"),
+            "accountNumber" : {
+                "no" : "3333-07-2052927"
+            },
+            "createDate" : ISODate("2020-07-03T07:58:17.317+09:00"),
+            "customerId" : {
+                "_id" : "5e3c3c03-602c-428c-b80e-7064344c56ec"
+            }
+        }
 
-입금 로그
-{
-  "_id": "5efde7fcf70b4caa3167a882",
-  "accountNumber": {
-    "no": "3333-07-2052927"
-  },
-  "createDate": "2020-07-02T22:58:20.728Z",
-  "customerId": {
-    "_id": "5e3c3c03-602c-428c-b80e-7064344c56ec"
-  },
-  "money": {
-    "won": 500000
-  }
-},
-{
-  "_id": "5efde7fcf70b4caa3167a87b",
-  "accountNumber": {
-    "no": "3333-07-2052927"
-  },
-  "createDate": "2020-07-02T22:58:20.514Z",
-  "customerId": {
-    "_id": "5e3c3c03-602c-428c-b80e-7064344c56ec"
-  },
-  "money": {
-    "won": 500000
-  }
-}
+        입금 로그
+        {
+          "_id": "5efde7fcf70b4caa3167a882",
+          "accountNumber": {
+            "no": "3333-07-2052927"
+          },
+          "createDate": "2020-07-02T22:58:20.728Z",
+          "customerId": {
+            "_id": "5e3c3c03-602c-428c-b80e-7064344c56ec"
+          },
+          "money": {
+            "won": 500000
+          }
+        },
+        {
+          "_id": "5efde7fcf70b4caa3167a87b",
+          "accountNumber": {
+            "no": "3333-07-2052927"
+          },
+          "createDate": "2020-07-02T22:58:20.514Z",
+          "customerId": {
+            "_id": "5e3c3c03-602c-428c-b80e-7064344c56ec"
+          },
+          "money": {
+            "won": 500000
+          }
+        }
 
-출금 로그
-{
-	"_id" : ObjectId("5efde7fdf70b4caa3167a88f"),
-	"accountNumber" : {
-		"no" : "3333-07-2052927"
-	},
-	"createDate" : ISODate("2020-07-03T07:58:20.929+09:00"),
-	"customerId" : {
-		"_id" : "5e3c3c03-602c-428c-b80e-7064344c56ec"
-	},
-	"money" : {
-		"won" : 1000000
-	}
-}
+        출금 로그
+        {
+            "_id" : ObjectId("5efde7fdf70b4caa3167a88f"),
+            "accountNumber" : {
+                "no" : "3333-07-2052927"
+            },
+            "createDate" : ISODate("2020-07-03T07:58:20.929+09:00"),
+            "customerId" : {
+                "_id" : "5e3c3c03-602c-428c-b80e-7064344c56ec"
+            },
+            "money" : {
+                "won" : 1000000
+            }
+        }
