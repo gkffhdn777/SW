@@ -43,7 +43,7 @@ public final class GeneratorProducer implements BankProducer<RawEvent> {
 
 	private static KafkaProducer<String, RawEvent> createProducer() {
 		Properties properties = new Properties();
-		properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092");
+		properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 		properties.put(ProducerConfig.ACKS_CONFIG, "all");

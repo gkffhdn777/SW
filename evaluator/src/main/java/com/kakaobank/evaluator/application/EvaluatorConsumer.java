@@ -6,8 +6,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.kakaobank.evaluator.event.BankActionType;
@@ -20,7 +18,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.IsolationLevel;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
@@ -45,7 +42,7 @@ public final class EvaluatorConsumer {
 	public void start() {
 
 		Properties properties = new Properties();
-		properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092");
+		properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 		properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class.getName());
 		properties.put(ConsumerConfig.GROUP_ID_CONFIG, "evaluator-group");
@@ -64,19 +61,12 @@ public final class EvaluatorConsumer {
 				for (ConsumerRecord<String, RawEvent> record : records) {
 					Event event = record.value().getBankActionType().getEvent(record.value().getPayload());
 
-					if (record.value().getBankActionType() == BankActionType.WITHDRAWAL
-							|| record.value().getBankActionType() == BankActionType.TRANSFER) {
-						LOGGER.info("이체 및 인출 감지 시작 시간 {}, event : {}", LocalDateTime.now(), event);
-						// @formatter:off
-						consume(event).exceptionally(ex -> {
-							saveRecord(record);
-							throw new KafkaConsumerException(ex);
-						}).isCompletedExceptionally();
-						// @formatter:on
+					boolean isDetect = detect(record, event);
+					if (!isDetect) {
+						throw new EvaluatorException("Detect failed.");
 					}
 
-					Boolean isSend = sendEvent(event);
-
+					boolean isSend = sendEvent(event);
 					if (!isSend) {
 						throw new EventStoreException("Event storage failed.");
 					}
@@ -94,7 +84,7 @@ public final class EvaluatorConsumer {
 			}
 
 		} catch (Exception ex) {
-			LOGGER.error("Error Kafka consumer : {}", ex.getMessage());
+			LOGGER.error("완전 실패시 알람 발송을 해야 한다. {}", ex.getMessage());
 		} finally {
 			try {
 				consumer.commitSync();
@@ -104,8 +94,17 @@ public final class EvaluatorConsumer {
 		}
 	}
 
-	private CompletableFuture<Future<RecordMetadata>> consume(final Event event) {
-		return evaluatorService.anomalyDetection(event);
+	private boolean detect(final ConsumerRecord<String, RawEvent> record, final Event event) {
+		if (record.value().getBankActionType() == BankActionType.WITHDRAWAL
+				|| record.value().getBankActionType() == BankActionType.TRANSFER) {
+			LOGGER.info("이체 및 인출 감지 시작 시간 {}, event : {}", LocalDateTime.now(), event);
+
+			return evaluatorService.anomalyDetection(event).exceptionally(ex -> {
+				saveRecord(record);
+				throw new KafkaConsumerException(ex);
+			}).isCompletedExceptionally();
+		}
+		return false;
 	}
 
 	private Boolean sendEvent(final Event event) {
