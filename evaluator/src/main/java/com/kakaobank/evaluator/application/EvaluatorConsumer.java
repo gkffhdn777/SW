@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.kakaobank.evaluator.event.BankActionType;
@@ -18,6 +20,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.IsolationLevel;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
@@ -61,12 +64,18 @@ public final class EvaluatorConsumer {
 				for (ConsumerRecord<String, RawEvent> record : records) {
 					Event event = record.value().getBankActionType().getEvent(record.value().getPayload());
 
-					boolean isDetect = detect(record, event);
-					if (!isDetect) {
-						throw new EvaluatorException("Detect failed.");
+					if (record.value().getBankActionType() == BankActionType.WITHDRAWAL
+							|| record.value().getBankActionType() == BankActionType.TRANSFER) {
+						LOGGER.info("이체 및 인출 감지 시작 시간 {}, event : {}", LocalDateTime.now(), event);
+						// @formatter:off
+						consume(event).exceptionally(ex -> {
+							saveRecord(record);
+							throw new KafkaConsumerException(ex);
+						}).isCompletedExceptionally();
+						// @formatter:on
 					}
 
-					boolean isSend = sendEvent(event);
+					Boolean isSend = sendEvent(event);
 					if (!isSend) {
 						throw new EventStoreException("Event storage failed.");
 					}
@@ -94,17 +103,8 @@ public final class EvaluatorConsumer {
 		}
 	}
 
-	private boolean detect(final ConsumerRecord<String, RawEvent> record, final Event event) {
-		if (record.value().getBankActionType() == BankActionType.WITHDRAWAL
-				|| record.value().getBankActionType() == BankActionType.TRANSFER) {
-			LOGGER.info("이체 및 인출 감지 시작 시간 {}, event : {}", LocalDateTime.now(), event);
-
-			return evaluatorService.anomalyDetection(event).exceptionally(ex -> {
-				saveRecord(record);
-				throw new KafkaConsumerException(ex);
-			}).isCompletedExceptionally();
-		}
-		return false;
+	private CompletableFuture<Future<RecordMetadata>> consume(final Event event) {
+		return evaluatorService.anomalyDetection(event);
 	}
 
 	private Boolean sendEvent(final Event event) {
