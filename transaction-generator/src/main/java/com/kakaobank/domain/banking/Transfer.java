@@ -62,13 +62,12 @@ public final class Transfer implements BankService {
 		Money transferMoney;
 		try {
 			transferMoney = customerBalance.minus(id, accountNumber, money);
-			Boolean sent = bank.send(ReceiverBank.KBBANK.name(), receiverAccountNumber, receiverName, money);
-			if (!sent) {
+			Boolean isSent = bank.send(ReceiverBank.KBBANK.name(), receiverAccountNumber, receiverName, money);
+			if (!isSent) {
 				transferMoney = customerBalance.plus(id, accountNumber, money);
 			}
 		} catch (Exception ex) {
-			LOGGER.error(ex.getMessage(), ex);
-			throw new TransferException("Error remittance.");
+			throw new TransferException("Error remittance.", ex);
 		}
 		bankProducer.send(new RawEvent(BankActionType.TRANSFER, this));
 		return transferMoney;

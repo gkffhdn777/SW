@@ -58,15 +58,8 @@ public final class EvaluatorService {
 					if (Boolean.TRUE.equals(x)) {
 						return anomalyDetectionNotification(event);
 					} else {
-						return CompletableFuture.supplyAsync(() ->
-								new FutureRecordMetadata(
-										null,
-										0L,
-										0L,
-										0L,
-										0,
-										0,
-										Time.SYSTEM));
+						return CompletableFuture.supplyAsync(() -> new FutureRecordMetadata(null, 0L,
+								0L, 0L, 0, 0, Time.SYSTEM));
 					}
 				}, executor)
 				.exceptionally(ex -> {
@@ -79,7 +72,7 @@ public final class EvaluatorService {
 		return evaluatorProducer.send(message);
 	}
 
-	private CompletableFuture<Boolean> verifyCustomer(final Event event, int age) {
+	private CompletableFuture<Boolean> verifyCustomer(final Event event, final int age) {
 		Objects.requireNonNull(event, "Registration event cannot be null.");
 		return CompletableFuture.supplyAsync(() -> {
 			Registration registration =
@@ -90,16 +83,16 @@ public final class EvaluatorService {
 		});
 	}
 
-	private CompletableFuture<Boolean> verifyAccount(final Event event, int compareHour) {
+	private CompletableFuture<Boolean> verifyAccount(final Event event, final int accountWithinHours) {
 		Objects.requireNonNull(event, "Account event cannot be null.");
 		return CompletableFuture.supplyAsync(() -> {
 			Account account = CrudRepository.getInstance().findOne(Filters.eq(CUSTOMER_ID, event.getCustomerId().getId()), Account.class);
 			IntPredicate hour = x -> DateUtils.isWithinOfTime(account.getCreateDate(), x);
-			return hour.test(compareHour);
+			return hour.test(accountWithinHours);
 		});
 	}
 
-	private CompletableFuture<Boolean> verifyDeposit(final Event event, int inTime, long lessThanMoney) {
+	private CompletableFuture<Boolean> verifyDeposit(final Event event, final int inTime, final long lessThanMoney) {
 		Objects.requireNonNull(event, "Deposit customerId cannot be null.");
 		Reaction reaction = (Reaction) event;
 

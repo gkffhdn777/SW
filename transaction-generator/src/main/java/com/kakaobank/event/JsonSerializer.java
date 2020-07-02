@@ -15,7 +15,7 @@ public class JsonSerializer implements Serializer<RawEvent> {
 		try {
 			return JsonMapper.getObjectMapper().writeValueAsBytes(rawEvent);
 		} catch (JsonProcessingException ex) {
-			throw new SerializationException("Error JsonSerializer event message", ex);
+			throw new SerializationException("JsonSerializer event message", ex);
 		}
 	}
 }

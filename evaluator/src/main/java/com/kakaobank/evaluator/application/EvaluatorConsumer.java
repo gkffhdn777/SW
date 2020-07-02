@@ -2,6 +2,7 @@ package com.kakaobank.evaluator.application;
 
 import java.time.Duration;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
@@ -42,6 +43,7 @@ public final class EvaluatorConsumer {
 	}
 
 	public void start() {
+
 		Properties properties = new Properties();
 		properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092");
 		properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
@@ -58,20 +60,23 @@ public final class EvaluatorConsumer {
 
 			while (true) {
 				ConsumerRecords<String, RawEvent> records = consumer.poll(Duration.ofMillis(5));
-				for (ConsumerRecord<String, RawEvent> record : records) {
 
+				for (ConsumerRecord<String, RawEvent> record : records) {
 					Event event = record.value().getBankActionType().getEvent(record.value().getPayload());
 
 					if (record.value().getBankActionType() == BankActionType.WITHDRAWAL
 							|| record.value().getBankActionType() == BankActionType.TRANSFER) {
-
+						LOGGER.info("이체 및 인출 감지 시작 시간 {}, event : {}", LocalDateTime.now(), event);
+						// @formatter:off
 						consume(event).exceptionally(ex -> {
 							saveRecord(record);
 							throw new KafkaConsumerException(ex);
 						}).isCompletedExceptionally();
+						// @formatter:on
 					}
 
 					Boolean isSend = sendEvent(event);
+
 					if (!isSend) {
 						throw new EventStoreException("Event storage failed.");
 					}

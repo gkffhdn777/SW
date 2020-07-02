@@ -16,8 +16,6 @@ public final class EvaluatorProducer {
 
 	private static final String TO_PIC = "fds.detections";
 
-	//./kafka-console-consumer.sh --topic fds.detections --bootstrap-server 172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092 --from-beginning
-	//./kafka-topics.sh --create --zookeeper 172.19.136.232:2181,172.19.136.233:2181,172.19.136.234:2181 --replication-factor 3 --partitions 1 --topic fds.detections
 	public CompletableFuture<Future<RecordMetadata>> send(final String message) {
 		try (final KafkaProducer<String, String> producer = createProducer()) {
 			ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TO_PIC, 0, null, message);

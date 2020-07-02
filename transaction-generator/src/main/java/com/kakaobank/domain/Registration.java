@@ -35,7 +35,7 @@ public final class Registration {
 
 	public Registration createAccount() {
 		if (id == null) {
-			throw new RuntimeException("회원 가입이 필요 합니다.");
+			throw new RuntimeException("Membership is required.");
 		}
 		this.account = new Account(id, bankProducer);
 		return this;
@@ -43,14 +43,14 @@ public final class Registration {
 
 	public AccountNumber getAccountNumber() {
 		if (account == null) {
-			throw new RuntimeException("계좌를 개설해 주세요.");
+			throw new RuntimeException("Open a bank account.");
 		}
 		return account.getAccountNumber();
 	}
 
 	public CustomerId getId() {
 		if (id == null) {
-			throw new RuntimeException("해당고객은 존재 하지않습니다.");
+			throw new RuntimeException("The customer does not exist.");
 		}
 		return id;
 	}

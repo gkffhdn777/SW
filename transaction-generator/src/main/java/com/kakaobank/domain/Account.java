@@ -18,10 +18,20 @@ public final class Account {
 	private LocalDateTime createDate;
 
 	public Account(final CustomerId id, final BankProducer<RawEvent> bankProducer) {
-		this.id = id;
+		verifyCustomerId(id);
 		this.accountNumber = accountNumber.create();
 		this.createDate = LocalDateTime.now();
+		if (bankProducer == null) {
+			throw new NullPointerException("BankProducer cannot be null.");
+		}
 		bankProducer.send(new RawEvent(BankActionType.ACCOUNT, this));
+	}
+
+	private void verifyCustomerId(final CustomerId id) {
+		if (id == null) {
+			throw new IllegalArgumentException("CustomerId cannot be null.");
+		}
+		this.id = id;
 	}
 
 	public AccountNumber getAccountNumber() {

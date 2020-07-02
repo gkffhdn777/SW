@@ -54,33 +54,3 @@ public final class GeneratorProducer implements BankProducer<RawEvent> {
 		return new KafkaProducer<>(properties);
 	}
 }
-
-//./kafka-topics.sh --create --zookeeper 172.19.136.232:2181,172.19.136.233:2181,172.19.136.234:2181 --replication-factor 3 --partitions 0 --topic fds.transactions
-// ./kafka-console-consumer.sh --topic fds.transactions --bootstrap-server 172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092 --from-beginning
-//./kafka-consumer-groups.sh --bootstrap-server 172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092 --group ncommunity-migration-master --describe
-//
-//./kafka-consumer-groups.sh --bootstrap-server 172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092 --group ncommunity-migration-slaves --describe
-//
-//./kafka-consumer-groups.sh --bootstrap-server 172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092 --group ncommunity-event --describe
-//
-//./kafka-consumer-groups.sh --bootstrap-server 172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092 --group ncommunity-migration-search --describe
-//
-//./kafka-consumer-groups.sh --bootstrap-server 172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092 --list
-//
-//./kafka-topics.sh --delete --zookeeper 172.19.136.232:2181,172.19.136.233:2181,172.19.136.234:2181 --topic migration-slaves
-//
-//./kafka-topics.sh --delete --zookeeper 172.19.136.232:2181,172.19.136.233:2181,172.19.136.234:2181 --topic migration-master
-//
-//./kafka-topics.sh --delete --zookeeper 172.19.136.232:2181,172.19.136.233:2181,172.19.136.234:2181 --topic migration-search
-//
-//./kafka-topics.sh --list --zookeeper 172.19.136.232:2181,172.19.136.233:2181,172.19.136.234:2181
-//
-//./kafka-topics.sh --create --zookeeper 172.19.136.232:2181,172.19.136.233:2181,172.19.136.234:2181 --replication-factor 1 --partitions 2 --topic migration-slaves
-//
-//./kafka-topics.sh --create --zookeeper 172.19.136.232:2181,172.19.136.233:2181,172.19.136.234:2181 --replication-factor 1 --partitions 2 --topic migration-master
-//
-//./kafka-topics.sh --create --zookeeper 172.19.136.232:2181,172.19.136.233:2181,172.19.136.234:2181 --replication-factor 2 --partitions 5 --topic migration-search
-//
-//./kafka-delete-records.sh --bootstrap-server 172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092 --offset-json-file j.json
-//
-//./kafka-consumer-groups.sh --bootstrap-server 172.19.136.236:9092,172.19.136.226:9092,172.19.136.231:9092 --group ncommunity-migration-search --topic migration-search --reset-offsets --to-offset 8790 --execute
