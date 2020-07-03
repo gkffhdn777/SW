@@ -14,10 +14,9 @@ public class Application extends Thread {
 				new EvaluatorRule(60, 48, 2, 1)), new EventStoreHandler()).start();
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		Application application = new Application();
-		application.start();
-
+		Thread.sleep(1000);
 		Runtime.getRuntime().addShutdownHook(application);
 	}
 }
