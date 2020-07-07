@@ -66,6 +66,7 @@ public final class EvaluatorConsumer {
 
 					} catch (Exception ex) {
 						saveRecord(record);
+						throw new KafkaConsumerException(ex);
 					}
 				}
 			}
