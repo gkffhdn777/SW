@@ -30,7 +30,7 @@ public final class Registration {
 		this.birthDate = customer.getBirthDate();
 		this.createDate = LocalDateTime.now();
 		this.bankProducer = bankProducer;
-		this.bankProducer.send(new RawEvent(BankActionType.REGISTRATION, this));
+		this.bankProducer.send(id.getId(), new RawEvent(BankActionType.REGISTRATION, this));
 	}
 
 	public Registration createAccount() {

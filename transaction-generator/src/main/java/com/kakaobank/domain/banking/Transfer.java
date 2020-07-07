@@ -69,7 +69,7 @@ public final class Transfer implements BankService {
 		} catch (Exception ex) {
 			throw new TransferException("Error remittance.", ex);
 		}
-		bankProducer.send(new RawEvent(BankActionType.TRANSFER, this));
+		bankProducer.send(id.getId(), new RawEvent(BankActionType.TRANSFER, this));
 		return transferMoney;
 	}
 }

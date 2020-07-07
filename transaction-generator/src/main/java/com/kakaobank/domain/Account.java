@@ -24,7 +24,7 @@ public final class Account {
 		if (bankProducer == null) {
 			throw new NullPointerException("BankProducer cannot be null.");
 		}
-		bankProducer.send(new RawEvent(BankActionType.ACCOUNT, this));
+		bankProducer.send(id.getId(), new RawEvent(BankActionType.ACCOUNT, this));
 	}
 
 	private void verifyCustomerId(final CustomerId id) {

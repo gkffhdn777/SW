@@ -1,12 +1,8 @@
 package com.kakaobank.domain;
 
 import com.kakaobank.event.RawEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Bank {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(Bank.class);
 
 	private final CustomerBalance repository;
 

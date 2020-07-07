@@ -21,13 +21,13 @@ public final class GeneratorProducer implements BankProducer<RawEvent> {
 	private static final String TO_PIC = "fds.transactions";
 
 	@Override
-	public void send(final RawEvent rawEvent) {
+	public void send(final String key, final RawEvent rawEvent) {
 		final KafkaProducer<String, RawEvent> producer = createProducer();
 		producer.initTransactions();
 
 		try {
 			ProducerRecord<String, RawEvent> producerRecord =
-					new ProducerRecord<>(TO_PIC, 0, null, rawEvent);
+					new ProducerRecord<>(TO_PIC, key, rawEvent);
 
 			producer.beginTransaction();
 			producer.send(producerRecord);
@@ -43,7 +43,7 @@ public final class GeneratorProducer implements BankProducer<RawEvent> {
 
 	private static KafkaProducer<String, RawEvent> createProducer() {
 		Properties properties = new Properties();
-		properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "");
 		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 		properties.put(ProducerConfig.ACKS_CONFIG, "all");

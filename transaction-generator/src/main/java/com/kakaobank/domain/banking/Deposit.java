@@ -38,7 +38,7 @@ public final class Deposit implements BankService {
 	@Override
 	public Money useOfMoney(final CustomerBalance customerBalance, final BankProducer<RawEvent> bankProducer) {
 		Money resultMoney = customerBalance.plus(id, accountNumber, money);
-		bankProducer.send(new RawEvent(BankActionType.DEPOSIT, this));
+		bankProducer.send(id.getId(), new RawEvent(BankActionType.DEPOSIT, this));
 		return resultMoney;
 	}
 }

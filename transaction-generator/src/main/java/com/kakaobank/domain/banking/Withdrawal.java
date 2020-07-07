@@ -36,7 +36,7 @@ public final class Withdrawal implements BankService {
 	@Override
 	public Money useOfMoney(CustomerBalance customerBalance, BankProducer<RawEvent> bankProducer) {
 		Money resultMoney = customerBalance.minus(id, accountNumber, money);
-		bankProducer.send(new RawEvent(BankActionType.WITHDRAWAL, this));
+		bankProducer.send(id.getId(), new RawEvent(BankActionType.WITHDRAWAL, this));
 		return resultMoney;
 	}
 }
