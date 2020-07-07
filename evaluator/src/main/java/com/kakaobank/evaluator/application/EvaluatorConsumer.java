@@ -1,29 +1,22 @@
 package com.kakaobank.evaluator.application;
 
 import java.time.Duration;
-
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.kakaobank.evaluator.event.BankActionType;
 import com.kakaobank.evaluator.event.JsonDeserializer;
 import com.kakaobank.evaluator.event.RawEvent;
 import com.kakaobank.evaluator.infra.CrudRepository;
-
 import com.kakaobank.evaluator.store.EventStoreException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.IsolationLevel;
 import org.apache.kafka.common.serialization.StringDeserializer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,75 +36,47 @@ public final class EvaluatorConsumer {
 	}
 
 	public void start() {
-
 		Properties properties = new Properties();
-		properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "");
 		properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class.getName());
 		properties.put(ConsumerConfig.GROUP_ID_CONFIG, "evaluator-group");
 		properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
 		properties.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, IsolationLevel.READ_COMMITTED.toString().toLowerCase(Locale.ROOT));
 
-		KafkaConsumer<String, RawEvent> consumer = new KafkaConsumer<>(properties);
-		consumer.subscribe(Collections.singletonList(TO_PIC));
-
-		try {
-			AtomicInteger atomic = new AtomicInteger(0);
-
+		try (KafkaConsumer<String, RawEvent> consumer = new KafkaConsumer<>(properties)) {
+			consumer.subscribe(Collections.singletonList(TO_PIC));
 			while (true) {
 				ConsumerRecords<String, RawEvent> records = consumer.poll(Duration.ofMillis(5));
 
 				for (ConsumerRecord<String, RawEvent> record : records) {
-					Event event = record.value().getBankActionType().getEvent(record.value().getPayload());
+					try {
+						Event event = record.value().getBankActionType().getEvent(record.value().getPayload());
 
-					if (record.value().getBankActionType() == BankActionType.WITHDRAWAL
-							|| record.value().getBankActionType() == BankActionType.TRANSFER) {
-						LOGGER.info("이체 및 인출 감지 시작 시간 {}, event : {}", LocalDateTime.now(), event);
-						// @formatter:off
-						consume(event).exceptionally(ex -> {
-							saveRecord(record);
-							throw new KafkaConsumerException(ex);
-						}).isCompletedExceptionally();
-						// @formatter:on
-					}
-
-					Boolean isSend = sendEvent(event);
-					if (!isSend) {
-						throw new EventStoreException("Event storage failed.");
-					}
-
-					consumer.commitAsync((offsets, ex) -> {
-						int marker = atomic.incrementAndGet();
-						if (ex != null) {
-							LOGGER.error("Error Kafka commitAsync : {}", ex.getMessage());
-							if (marker == atomic.get()) {
-								consumer.commitAsync();
-							}
+						if (record.value().getBankActionType() == BankActionType.WITHDRAWAL
+								|| record.value().getBankActionType() == BankActionType.TRANSFER) {
+							LOGGER.info("이체 및 인출 감지 시작 시간 {}, event : {}", LocalDateTime.now(), event);
+							evaluatorService.anomalyDetection(event);
 						}
-					});
+
+						if (!sendEvent(event)) {
+							throw new EventStoreException("Event storage failed.");
+						}
+						consumer.commitSync();
+
+					} catch (Exception ex) {
+						saveRecord(record);
+					}
 				}
 			}
-
-		} catch (Exception ex) {
-			LOGGER.error("완전 실패시 알람 발송을 해야 한다. {}", ex.getMessage());
-		} finally {
-			try {
-				consumer.commitSync();
-			} finally {
-				consumer.close();
-			}
 		}
-	}
-
-	private CompletableFuture<Future<RecordMetadata>> consume(final Event event) {
-		return evaluatorService.anomalyDetection(event);
 	}
 
 	private Boolean sendEvent(final Event event) {
 		return eventHandler.apply(event);
 	}
 
-	private static void saveRecord(final ConsumerRecord<String, RawEvent> record) {
+	private void saveRecord(final ConsumerRecord<String, RawEvent> record) {
 		final Record buildRecord = Record.ConsumerRecordBuilder.aConsumerRecord(
 				record.topic(),
 				record.key(),

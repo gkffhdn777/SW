@@ -1,7 +1,6 @@
 package com.kakaobank.evaluator.application;
 
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -16,11 +15,11 @@ public final class EvaluatorProducer {
 
 	private static final String TO_PIC = "fds.detections";
 
-	public CompletableFuture<Future<RecordMetadata>> send(final String message) {
+	public Future<RecordMetadata> send(final String message) {
 		try (final KafkaProducer<String, String> producer = createProducer()) {
-			ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TO_PIC, 0, null, message);
+			ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TO_PIC, message);
 			Future<RecordMetadata> future = producer.send(producerRecord);
-			return CompletableFuture.supplyAsync(() -> future);
+			return future;
 		} catch (KafkaException ex) {
 			throw new KafkaProducerException(ex);
 		}
@@ -28,7 +27,7 @@ public final class EvaluatorProducer {
 
 	public static KafkaProducer<String, String> createProducer() {
 		Properties properties = new Properties();
-		properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "");
 		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		properties.put(ProducerConfig.ACKS_CONFIG, "all");
