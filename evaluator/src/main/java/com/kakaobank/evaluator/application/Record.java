@@ -10,7 +10,6 @@ public final class Record {
 
 	private final int partition;
 
-	//유니크
 	private final long offset;
 
 	private final long timestamp;
