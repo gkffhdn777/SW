@@ -10,7 +10,5 @@ public interface Repository {
 
 	<T> Spliterator<T> find(Bson filter, Class<T> clazz);
 
-	<T> T findOne(Class<T> clazz);
-
 	<T> T findOne(Bson filter, Class<T> clazz);
 }
