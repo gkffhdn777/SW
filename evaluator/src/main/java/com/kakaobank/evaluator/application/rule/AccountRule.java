@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
+import com.kakaobank.evaluator.application.EvaluatorException;
 import com.kakaobank.evaluator.application.Event;
 import com.kakaobank.evaluator.application.Rule;
 import com.kakaobank.evaluator.event.Account;
@@ -25,7 +26,7 @@ public class AccountRule implements Rule {
 			Account account = CrudRepository.getInstance().findOne(Filters.eq("customerId._id", event.getCustomerId().getId()), Account.class);
 			return predicate.test(account);
 		}).exceptionally(ex -> {
-			throw new RuntimeException("AccountRule verification failed.", ex);
+			throw new EvaluatorException("AccountRule verification failed.", ex);
 		});
 	}
 }

@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
+import com.kakaobank.evaluator.application.EvaluatorException;
 import com.kakaobank.evaluator.application.Event;
 import com.kakaobank.evaluator.application.Rule;
 import com.kakaobank.evaluator.event.Registration;
@@ -27,7 +28,7 @@ public class CustomerRule implements Rule {
 							.findOne(Filters.eq("customerId._id", event.getCustomerId().getId()), Registration.class);
 			return predicate.test(registration);
 		}).exceptionally(ex -> {
-			throw new RuntimeException("CustomerRule verification failed.", ex);
+			throw new EvaluatorException("CustomerRule verification failed.", ex);
 		});
 	}
 }

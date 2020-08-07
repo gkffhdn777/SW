@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
+import com.kakaobank.evaluator.application.EvaluatorException;
 import com.kakaobank.evaluator.application.Event;
 import com.kakaobank.evaluator.application.Reaction;
 import com.kakaobank.evaluator.application.Rule;
@@ -36,7 +37,7 @@ public class MoneyRule implements Rule {
 			long balance = totalMoney.longValue() - reaction.getMoney().getWon().longValue();
 			return predicate.test(balance);
 		}).exceptionally(ex -> {
-			throw new RuntimeException("MoneyRule verification failed.", ex);
+			throw new EvaluatorException("MoneyRule verification failed.", ex);
 		});
 	}
 }
