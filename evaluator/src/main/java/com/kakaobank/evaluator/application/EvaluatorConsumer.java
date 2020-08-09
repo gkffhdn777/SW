@@ -43,13 +43,13 @@ public final class EvaluatorConsumer {
 			while (true) {
 				ConsumerRecords<String, RawEvent> records = consumer.poll(Duration.ofMillis(1000));
 				for (ConsumerRecord<String, RawEvent> record : records) {
-						Event event = record.value().getBankActionType().getEvent(record.value().getPayload());
-						detection(record);
-						if (!sendEvent(event)) {
-							//이벤트 저장 실패시 인메모리 재처리가 필요 함.
-							throw new EventStoreException("Event storage failed.");
-						}
-						consumer.commitSync();
+					Event event = record.value().getBankActionType().getEvent(record.value().getPayload());
+					detection(record);
+					if (!sendEvent(event)) {
+						//이벤트 저장 실패시 인메모리 재처리가 필요 함.
+						throw new EventStoreException("Event storage failed.");
+					}
+					consumer.commitSync();
 				}
 			}
 		} catch (Exception ex) {
